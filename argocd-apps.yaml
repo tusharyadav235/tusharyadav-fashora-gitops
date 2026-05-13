@@ -21,7 +21,7 @@ spec:
   project: default
 
   source:
-    repoURL:        https://github.com/your-org/fashora-gitops.git   # ← change
+    repoURL:        https://github.com/tusharyadav235/tusharyadav-fashora-gitops.git   # ← change
     targetRevision: main
     path:           overlays/dev
 
@@ -67,7 +67,7 @@ spec:
   project: default
 
   source:
-    repoURL:        https://github.com/your-org/fashora-gitops.git   # ← change
+    repoURL:        https://github.com/tusharyadav235/tusharyadav-fashora-gitops.git   # ← change
     targetRevision: main
     path:           overlays/staging
 
@@ -110,7 +110,7 @@ spec:
   project: default
 
   source:
-    repoURL:        https://github.com/your-org/fashora-gitops.git   # ← change
+    repoURL:        https://github.com/tusharyadav235/tusharyadav-fashora-gitops.git   # ← change
     targetRevision: main
     path:           overlays/prod
 
