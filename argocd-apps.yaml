@@ -1,0 +1,139 @@
+# ══════════════════════════════════════════════════════════════════════════════
+#  ArgoCD Application Manifests
+#  Apply these ONCE to your EKS cluster:
+#    kubectl apply -f argocd-apps.yaml -n argocd
+#
+#  ArgoCD will then continuously watch the GitOps repo and sync automatically.
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ── Development Environment ─────────────────────────────────────────────────
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name:      fashora-dev
+  namespace: argocd
+  labels:
+    project:     fashora
+    environment: dev
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io   # cleanup on delete
+spec:
+  project: default
+
+  source:
+    repoURL:        https://github.com/your-org/fashora-gitops.git   # ← change
+    targetRevision: main
+    path:           overlays/dev
+
+  destination:
+    server:    https://kubernetes.default.svc   # in-cluster
+    namespace: fashora-dev
+
+  syncPolicy:
+    automated:
+      prune:    true    # delete removed resources
+      selfHeal: true    # revert manual kubectl changes
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration:    5s
+        factor:      2
+        maxDuration: 3m
+
+  # ── Health checks ────────────────────────────────────────────────────────
+  ignoreDifferences:
+    - group:     apps
+      kind:      Deployment
+      jsonPointers:
+        - /spec/replicas    # ignore HPA-managed replica count
+
+---
+# ── Staging Environment ─────────────────────────────────────────────────────
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name:      fashora-staging
+  namespace: argocd
+  labels:
+    project:     fashora
+    environment: staging
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  source:
+    repoURL:        https://github.com/your-org/fashora-gitops.git   # ← change
+    targetRevision: main
+    path:           overlays/staging
+
+  destination:
+    server:    https://kubernetes.default.svc
+    namespace: fashora-staging
+
+  syncPolicy:
+    automated:
+      prune:    true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor:   2
+        maxDuration: 3m
+
+  ignoreDifferences:
+    - group:     apps
+      kind:      Deployment
+      jsonPointers:
+        - /spec/replicas
+
+---
+# ── Production Environment ──────────────────────────────────────────────────
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name:      fashora-prod
+  namespace: argocd
+  labels:
+    project:     fashora
+    environment: prod
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  source:
+    repoURL:        https://github.com/your-org/fashora-gitops.git   # ← change
+    targetRevision: main
+    path:           overlays/prod
+
+  destination:
+    server:    https://kubernetes.default.svc
+    namespace: fashora-prod
+
+  syncPolicy:
+    automated:
+      prune:    true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+    retry:
+      limit:       5
+      backoff:
+        duration:    10s
+        factor:      2
+        maxDuration: 5m
+
+  ignoreDifferences:
+    - group:     apps
+      kind:      Deployment
+      jsonPointers:
+        - /spec/replicas

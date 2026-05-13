@@ -1,0 +1,33 @@
+# ── Backend ClusterIP Service ──────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: fashora-backend-svc
+  labels:
+    app: fashora-backend
+spec:
+  type: ClusterIP
+  selector:
+    app: fashora-backend
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+---
+# ── Frontend ClusterIP Service ─────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: fashora-frontend-svc
+  labels:
+    app: fashora-frontend
+spec:
+  type: ClusterIP
+  selector:
+    app: fashora-frontend
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      protocol: TCP

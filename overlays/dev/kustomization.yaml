@@ -1,0 +1,62 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: fashora-dev
+
+resources:
+  - ../../base
+
+namePrefix: dev-
+
+commonLabels:
+  environment: dev
+
+# ── Image tags (Jenkins patches the newTag values) ─────────────────────────
+images:
+  - name:   ujjawalboss/fashora-backend:v1
+    newTag: main-abc1234 # backend   ← Jenkins patches this line
+  - name:   ujjawalboss/fashora-frontend:v1
+    newTag: main-abc1234 # frontend  ← Jenkins patches this line
+
+# ── Dev-specific patches ───────────────────────────────────────────────────
+patches:
+  - target:
+      kind: Deployment
+      name: fashora-backend
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1                  # 1 replica in dev (save cost)
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: "100m"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: "256Mi"
+
+  - target:
+      kind: Deployment
+      name: fashora-frontend
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+
+  - target:
+      kind: HorizontalPodAutoscaler
+      name: fashora-backend-hpa
+    patch: |-
+      - op: replace
+        path: /spec/minReplicas
+        value: 1
+      - op: replace
+        path: /spec/maxReplicas
+        value: 3
+
+  - target:
+      kind: Ingress
+      name: fashora-ingress
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: dev.fashora.yourdomain.com

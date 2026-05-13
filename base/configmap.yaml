@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fashora-backend-config
+data:
+  DB_HOST: fashora-mysql-svc
+  DB_PORT: "3306"
+  DB_NAME: fashora_db
+  DB_USER: fashora_user
+  SPRING_PROFILES_ACTIVE: prod

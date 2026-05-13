@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: fashora
+
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - secretstore.yaml
+  - externalsecret.yaml
+  - mysql-service.yaml
+  - mysql.yaml
+  - backend-deployment.yaml
+  - frontend-deployment.yaml
+  - services.yaml
+  - ingress.yaml
+  - hpa.yaml
+
+commonLabels:
+  managed-by: argocd
+  project:     fashora

@@ -1,0 +1,61 @@
+# ══════════════════════════════════════════════════════════════════════════════
+#  Fashora Ingress
+#  Works with:
+#   • AWS Load Balancer Controller  (annotation: kubernetes.io/ingress.class: alb)
+#   • Nginx Ingress Controller      (annotation: kubernetes.io/ingress.class: nginx)
+#
+#  Traffic routing:
+#   /api/*   → fashora-backend-svc:8080
+#   /*       → fashora-frontend-svc:80
+# ══════════════════════════════════════════════════════════════════════════════
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fashora-ingress
+  labels:
+    app: fashora
+  annotations:
+    # ── AWS ALB (uncomment for EKS with AWS LB Controller) ─────────────────
+    kubernetes.io/ingress.class:                    "alb"
+    alb.ingress.kubernetes.io/scheme:               "internet-facing"
+    alb.ingress.kubernetes.io/target-type:          "ip"
+    alb.ingress.kubernetes.io/listen-ports:         '[{"HTTP":80},{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/ssl-redirect:         "443"
+    alb.ingress.kubernetes.io/certificate-arn:      "arn:aws:acm:REGION:ACCOUNT:certificate/CERT-ID"  # ← change
+    alb.ingress.kubernetes.io/healthcheck-path:     "/actuator/health"
+    alb.ingress.kubernetes.io/success-codes:        "200"
+    alb.ingress.kubernetes.io/load-balancer-name:  "fashora-alb"
+    alb.ingress.kubernetes.io/group.name:           "fashora"
+
+    # ── Nginx Ingress (uncomment instead if using Nginx controller) ─────────
+    # kubernetes.io/ingress.class:       "nginx"
+    # nginx.ingress.kubernetes.io/rewrite-target: /
+    # cert-manager.io/cluster-issuer:    "letsencrypt-prod"
+
+spec:
+  # tls:                        # ← uncomment for HTTPS with cert-manager
+  #   - hosts:
+  #       - fashora.yourdomain.com
+  #     secretName: fashora-tls
+
+  rules:
+    - host: fashora.yourdomain.com         # ← change to your domain
+      http:
+        paths:
+          # API requests → Spring Boot backend
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: fashora-backend-svc
+                port:
+                  number: 8080
+
+          # All other traffic → Nginx frontend
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: fashora-frontend-svc
+                port:
+                  number: 80

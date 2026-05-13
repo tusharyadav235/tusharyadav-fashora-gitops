@@ -1,0 +1,46 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: fashora-staging
+
+resources:
+  - ../../base
+
+namePrefix: staging-
+
+commonLabels:
+  environment: staging
+
+images:
+  - name:   ujjawalboss/fashora-backend:v1
+    newTag: develop-abc1234 # backend   ← Jenkins patches this line
+  - name:   ujjawalboss/fashora-frontend:v1
+    newTag: develop-abc1234 # frontend  ← Jenkins patches this line
+
+patches:
+  - target:
+      kind: Deployment
+      name: fashora-backend
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+
+  - target:
+      kind: HorizontalPodAutoscaler
+      name: fashora-backend-hpa
+    patch: |-
+      - op: replace
+        path: /spec/minReplicas
+        value: 2
+      - op: replace
+        path: /spec/maxReplicas
+        value: 5
+
+  - target:
+      kind: Ingress
+      name: fashora-ingress
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: staging.fashora.yourdomain.com
