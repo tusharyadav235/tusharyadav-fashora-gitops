@@ -2,20 +2,18 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: fashora-backend
+  namespace: fashora-dev
   labels:
     app: fashora-backend
     component: backend
     managed-by: argocd
 spec:
-  replicas: 2
+  replicas: 1  # Reduced to fit cluster capacity
   selector:
     matchLabels:
       app: fashora-backend
   strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0          # zero-downtime rolling update
+    type: Recreate # Kills old pod first to free up RAM/CPU
   template:
     metadata:
       labels:
@@ -26,26 +24,19 @@ spec:
         prometheus.io/port:   "8080"
         prometheus.io/path:   "/actuator/prometheus"
     spec:
-      # ── Security ──────────────────────────────────────────────────────────
       securityContext:
         runAsNonRoot: true
         runAsUser:    1000
         fsGroup:      1000
-
-      # ── Graceful shutdown ──────────────────────────────────────────────────
       terminationGracePeriodSeconds: 60
-
-      # ── Containers ────────────────────────────────────────────────────────
       containers:
         - name: backend
-          image: ujjawalboss/fashora-backend:v1   # patched by Kustomize
+          image: ujjawalboss/fashora-backend:v1
           imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8080
               protocol: TCP
-
-          # ── Environment from ConfigMap + Secret ───────────────────────────
           envFrom:
             - configMapRef:
                 name: fashora-backend-config
@@ -60,47 +51,35 @@ spec:
                 secretKeyRef:
                   name: fashora-secrets
                   key: jwt-secret
-
-          # ── Health probes ─────────────────────────────────────────────────
           startupProbe:
             httpGet:
               path: /actuator/health
               port: 8080
             failureThreshold: 30
-            periodSeconds:    10          # up to 5 min for first start
-
+            periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
               port: 8080
             initialDelaySeconds: 10
-            periodSeconds:       20
-            failureThreshold:    3
-
+            periodSeconds: 20
+            failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
               port: 8080
             initialDelaySeconds: 10
-            periodSeconds:       10
-            failureThreshold:    3
-
-          # ── Resources ────────────────────────────────────────────────────
+            periodSeconds: 10
+            failureThreshold: 3
           resources:
             requests:
-              cpu:    "250m"
-              memory: "512Mi"
+              cpu: "100m"
+              memory: "256Mi" # Balanced for Spring Boot startup
             limits:
-              cpu:    "1000m"
-              memory: "1Gi"
-
-          # ── Security context ──────────────────────────────────────────────
+              cpu: "500m"
+              memory: "384Mi"
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem:   false
             capabilities:
               drop: ["ALL"]
-
-      # ── Image pull secret (if private registry) ───────────────────────────
-      # imagePullSecrets:
-      #   - name: dockerhub-secret
