@@ -14,9 +14,9 @@ labels:
 
 images:
   - name: ujjawalboss/fashora-backend
-    newTag: main-abc1234
+    newTag: main-d7c122b  # Updated to match Jenkins build
   - name: ujjawalboss/fashora-frontend
-    newTag: main-abc1234
+    newTag: main-d7c122b  # Updated to match Jenkins build
 
 patches:
   - target:
@@ -32,6 +32,12 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/resources/requests/memory
         value: "256Mi"
+      # Add this JVM optimization to keep your t3.micro stable
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: JAVA_OPTS
+          value: "-Xms128m -Xmx256m -XX:+UseSerialGC"
 
   - target:
       kind: Deployment
@@ -50,7 +56,7 @@ patches:
         value: 1
       - op: replace
         path: /spec/maxReplicas
-        value: 3
+        value: 2  # Reduced to 2 to save RAM on free tier
 
   - target:
       kind: Ingress
