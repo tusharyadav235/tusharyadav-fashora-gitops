@@ -9,7 +9,7 @@ resources:
   - secretstore.yaml
   - externalsecret.yaml
   - mysql-service.yaml
-  - mysql.yaml
+  - my-sql.yaml
   - backend-deployment.yaml
   - frontend-deployment.yaml
   - services.yaml
