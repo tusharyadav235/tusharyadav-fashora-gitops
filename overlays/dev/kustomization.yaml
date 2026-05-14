@@ -14,9 +14,9 @@ labels:
 
 images:
   - name: ujjawalboss/fashora-backend
-    newTag: main-d7c122b  # Updated to match Jenkins build
+    newTag: main-76e3841  # Updated to match Jenkins build
   - name: ujjawalboss/fashora-frontend
-    newTag: main-d7c122b  # Updated to match Jenkins build
+    newTag: main-76e3841  # Updated to match Jenkins build
 
 patches:
   - target:
