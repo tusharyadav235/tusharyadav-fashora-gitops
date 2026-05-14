@@ -8,17 +8,16 @@ resources:
 
 namePrefix: dev-
 
-commonLabels:
-  environment: dev
+labels:
+  - pairs:
+      environment: dev
 
-# ── Image tags (Jenkins patches the newTag values) ─────────────────────────
 images:
-  - name:   ujjawalboss/fashora-backend:v1
-    newTag: main-abc1234 # backend   ← Jenkins patches this line
-  - name:   ujjawalboss/fashora-frontend:v1
-    newTag: main-abc1234 # frontend  ← Jenkins patches this line
+  - name: ujjawalboss/fashora-backend
+    newTag: main-abc1234
+  - name: ujjawalboss/fashora-frontend
+    newTag: main-abc1234
 
-# ── Dev-specific patches ───────────────────────────────────────────────────
 patches:
   - target:
       kind: Deployment
@@ -26,7 +25,7 @@ patches:
     patch: |-
       - op: replace
         path: /spec/replicas
-        value: 1                  # 1 replica in dev (save cost)
+        value: 1
       - op: replace
         path: /spec/template/spec/containers/0/resources/requests/cpu
         value: "100m"

@@ -8,14 +8,15 @@ resources:
 
 namePrefix: staging-
 
-commonLabels:
-  environment: staging
+labels:
+  - pairs:
+      environment: staging
 
 images:
-  - name:   ujjawalboss/fashora-backend:v1
-    newTag: develop-abc1234 # backend   ← Jenkins patches this line
-  - name:   ujjawalboss/fashora-frontend:v1
-    newTag: develop-abc1234 # frontend  ← Jenkins patches this line
+  - name: ujjawalboss/fashora-backend
+    newTag: develop-abc1234
+  - name: ujjawalboss/fashora-frontend
+    newTag: develop-abc1234
 
 patches:
   - target:

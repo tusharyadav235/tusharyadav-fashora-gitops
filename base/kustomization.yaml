@@ -16,6 +16,7 @@ resources:
   - ingress.yaml
   - hpa.yaml
 
-commonLabels:
-  managed-by: argocd
-  project:     fashora
+labels:
+  - pairs:
+      managed-by: argocd
+      project: fashora

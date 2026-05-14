@@ -8,14 +8,15 @@ resources:
 
 namePrefix: prod-
 
-commonLabels:
-  environment: prod
+labels:
+  - pairs:
+      environment: prod
 
 images:
-  - name:   ujjawalboss/fashora-backend:v1
-    newTag: main-abc1234 # backend   ← Jenkins patches this line
-  - name:   ujjawalboss/fashora-frontend:v1
-    newTag: main-abc1234 # frontend  ← Jenkins patches this line
+  - name: ujjawalboss/fashora-backend
+    newTag: main-abc1234
+  - name: ujjawalboss/fashora-frontend
+    newTag: main-abc1234
 
 patches:
   # Backend — full production scale
